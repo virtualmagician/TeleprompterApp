@@ -31,6 +31,8 @@ namespace TeleprompterApp
                 };
                 timer.Tick += Timer_Tick;
                 this.KeyDown += Window_KeyDown;
+                this.Activated += TeleprompterWindow_Activated;
+                this.Deactivated += TeleprompterWindow_Deactivated;
             }
             catch (Exception ex)
             {
@@ -83,7 +85,15 @@ namespace TeleprompterApp
             {
                 try
                 {
-                    Scroller.ScrollToVerticalOffset(Scroller.VerticalOffset + ScrollingSpeed);
+                    // Only scroll if not at the end
+                    if (Scroller.VerticalOffset < Scroller.ScrollableHeight)
+                    {
+                        Scroller.ScrollToVerticalOffset(Scroller.VerticalOffset + ScrollingSpeed);
+                    }
+                    else
+                    {
+                        timer.Stop(); // Stop scrolling at the end
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -190,6 +200,16 @@ namespace TeleprompterApp
             {
                 MessageBox.Show("Error setting font size: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void TeleprompterWindow_Activated(object sender, EventArgs e)
+        {
+            // Optional: Handle actions when the TeleprompterWindow becomes active
+        }
+
+        private void TeleprompterWindow_Deactivated(object sender, EventArgs e)
+        {
+            // Optional: Handle actions when the TeleprompterWindow loses focus
         }
     }
 }

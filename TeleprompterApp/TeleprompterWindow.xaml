@@ -2,13 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:local="clr-namespace:TeleprompterApp"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Teleprompter" Height="600" Width="800" Background="Black">
+        Title="Teleprompter" Height="600" Width="800" Background="Black"
+        Focusable="True">
     <Window.Resources>
         <local:VerticalCenterConverter x:Key="VerticalCenterConverter"/>
     </Window.Resources>
     <Grid>
-        <!-- ScrollViewer -->
-        <ScrollViewer x:Name="Scroller" Background="Black" IsHitTestVisible="False">
+        <!-- ScrollViewer with Hit Testing Enabled -->
+        <ScrollViewer x:Name="Scroller" Background="Black" IsHitTestVisible="True" Focusable="True">
             <FlowDocumentScrollViewer x:Name="ScriptViewer" Background="Black" Foreground="White" IsHitTestVisible="False">
                 <FlowDocument x:Name="ScriptDocument" Background="Black" Foreground="White"/>
             </FlowDocumentScrollViewer>

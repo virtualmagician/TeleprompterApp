@@ -82,6 +82,9 @@ namespace TeleprompterApp
 
                     // Restart scrolling from the beginning
                     teleprompterWindow.ResetScrolling();
+
+                    // Activate the TeleprompterWindow
+                    teleprompterWindow.Activate();
                 }
             }
             catch (Exception ex)
