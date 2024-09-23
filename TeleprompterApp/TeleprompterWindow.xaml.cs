@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.ComponentModel; // Needed for CancelEventArgs
 
 namespace TeleprompterApp
 {
@@ -16,90 +17,179 @@ namespace TeleprompterApp
         public TeleprompterWindow()
         {
             InitializeComponent();
-            LoadUserSettings();
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(20);
-            timer.Tick += Timer_Tick;
-            this.KeyDown += Window_KeyDown;
+            Loaded += TeleprompterWindow_Loaded;
+        }
+
+        private void TeleprompterWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                LoadUserSettings();
+                timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(20)
+                };
+                timer.Tick += Timer_Tick;
+                this.KeyDown += Window_KeyDown;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error initializing TeleprompterWindow: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void LoadScript(Stream scriptStream)
         {
-            TextRange range = new TextRange(ScriptDocument.ContentStart, ScriptDocument.ContentEnd);
-            range.Load(scriptStream, DataFormats.Rtf);
+            try
+            {
+                TextRange range = new TextRange(ScriptDocument.ContentStart, ScriptDocument.ContentEnd);
+                range.Load(scriptStream, DataFormats.Rtf);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading script: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void StartScrolling()
         {
-            timer.Start();
+            try
+            {
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error starting scrolling: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void ResetScrolling()
+        {
+            try
+            {
+                timer.Stop();
+                Scroller.ScrollToVerticalOffset(0);
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error resetting scrolling: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
             if (!isPaused)
             {
-                Scroller.ScrollToVerticalOffset(Scroller.VerticalOffset + ScrollingSpeed);
+                try
+                {
+                    Scroller.ScrollToVerticalOffset(Scroller.VerticalOffset + ScrollingSpeed);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error during scrolling: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space)
+            try
             {
-                isPaused = !isPaused;
+                if (e.Key == Key.Space)
+                {
+                    isPaused = !isPaused;
+                }
+                else if (e.Key == Key.Up)
+                {
+                    ScrollingSpeed += 0.1;
+                }
+                else if (e.Key == Key.Down)
+                {
+                    ScrollingSpeed = Math.Max(0, ScrollingSpeed - 0.1);
+                }
             }
-            else if (e.Key == Key.Up)
+            catch (Exception ex)
             {
-                ScrollingSpeed += 0.1;
+                MessageBox.Show("Error handling key press: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else if (e.Key == Key.Down)
-            {
-                ScrollingSpeed = Math.Max(0, ScrollingSpeed - 0.1);
-            }
-        }
-
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
         }
 
         private void LoadUserSettings()
         {
-            if (Properties.Settings.Default.TeleprompterWindowWidth > 0)
+            try
             {
-                this.Width = Properties.Settings.Default.TeleprompterWindowWidth;
-                this.Height = Properties.Settings.Default.TeleprompterWindowHeight;
-                this.Left = Properties.Settings.Default.TeleprompterWindowLeft;
-                this.Top = Properties.Settings.Default.TeleprompterWindowTop;
+                if (Properties.Settings.Default.TeleprompterWindowWidth > 0)
+                {
+                    this.Width = Properties.Settings.Default.TeleprompterWindowWidth;
+                    this.Height = Properties.Settings.Default.TeleprompterWindowHeight;
+                    this.Left = Properties.Settings.Default.TeleprompterWindowLeft;
+                    this.Top = Properties.Settings.Default.TeleprompterWindowTop;
+                }
+                else
+                {
+                    this.Width = 800;
+                    this.Height = 600;
+                    this.Left = 100;
+                    this.Top = 100;
+                }
+
+                // Initialize default scrolling speed if not set
+                if (Properties.Settings.Default.ScrollingSpeed > 0)
+                {
+                    ScrollingSpeed = Properties.Settings.Default.ScrollingSpeed;
+                }
+                else
+                {
+                    ScrollingSpeed = 2.0;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                this.Width = 800;
-                this.Height = 600;
-                this.Left = 100;
-                this.Top = 100;
+                MessageBox.Show("Error loading TeleprompterWindow settings: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void SaveUserSettings()
         {
-            Properties.Settings.Default.TeleprompterWindowWidth = this.Width;
-            Properties.Settings.Default.TeleprompterWindowHeight = this.Height;
-            Properties.Settings.Default.TeleprompterWindowLeft = this.Left;
-            Properties.Settings.Default.TeleprompterWindowTop = this.Top;
-            Properties.Settings.Default.Save();
+            try
+            {
+                Properties.Settings.Default.TeleprompterWindowWidth = this.Width;
+                Properties.Settings.Default.TeleprompterWindowHeight = this.Height;
+                Properties.Settings.Default.TeleprompterWindowLeft = this.Left;
+                Properties.Settings.Default.TeleprompterWindowTop = this.Top;
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving TeleprompterWindow settings: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        protected override void OnClosed(EventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
-            SaveUserSettings();
-            base.OnClosed(e);
+            try
+            {
+                SaveUserSettings();
+                timer?.Stop();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error during closing TeleprompterWindow: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            base.OnClosing(e);
         }
 
         public void SetFontSize(double fontSize)
         {
-            ScriptDocument.FontSize = fontSize;
+            try
+            {
+                ScriptDocument.FontSize = fontSize;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error setting font size: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

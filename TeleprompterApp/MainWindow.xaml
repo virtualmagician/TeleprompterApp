@@ -63,8 +63,8 @@
             <!-- Save Script Button -->
             <Button Content="Save Script" Click="SaveButton_Click" Margin="5,0"/>
 
-            <!-- Start Teleprompter Button -->
-            <Button Content="Start Teleprompter" Click="StartButton_Click" Margin="20,0"/>
+            <!-- Refresh Prompter Button -->
+            <Button Content="Refresh Prompter" Click="RefreshButton_Click" Margin="20,0"/>
         </StackPanel>
     </Grid>
 </Window>
